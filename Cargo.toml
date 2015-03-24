@@ -1,0 +1,11 @@
+[package]
+
+name = "rpg"
+version = "0.0.1"
+authors = ["Chris Gill"]
+license = "MIT"
+description = "misc rpg functions/collections"
+repository = "https://github.com/viperscape/rpg"
+
+[dependencies]
+bitflags = "*"
