@@ -5,5 +5,6 @@ pub use inventory::{ InvItem,
                      InvWork,
                      InvErr,
                      Item,
-                     Inv };
+                     Inv,
+                     Intrinsics };
 pub mod inventory;

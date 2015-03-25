@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-
+#[derive(Debug)]
 pub enum InvErr {
     Maxed,
     Limit,
@@ -27,7 +27,6 @@ pub trait InvWork<T> {
 #[derive(PartialEq,Debug,Clone)]
 pub struct Item<K> {
     pub count: u16,
-    pub weight: f32,
     pub vol: [u8;2], //width,height
     id: u32,
     pub desc: String,
@@ -37,11 +36,10 @@ pub struct Item<K> {
 impl<K> Item<K> {
     pub fn new (k: K, id:u32) -> Item<K> {
         Item { count: 1,
-               weight: 0.0,
                vol: [0,0], //unbounded volume
                id: id,
                desc: "".to_string(),
-               kind: k }
+               kind: k, }
     }
     pub fn get_id (&self) -> u32 { self.id }
 }
@@ -71,10 +69,13 @@ impl<K> Inv<K> {
         }
     }
 }
-impl<K> InvWork<Item<K>> for Inv<K> {
-    fn add (&mut self, d:Item<K>) -> Result<u32,InvErr> {
+impl<K:Intrinsics> InvWork<Item<K>> for Inv<K> {
+    fn add (&mut self, mut d:Item<K>) -> Result<u32,InvErr> {
         let id = d.get_id();
-        let weight = d.weight;
+        
+        let mut weight = 0.0;
+        if let Some(w) = d.kind.get_weight() {weight=*w;}
+        
         if id == 0 { return Err(InvErr::Invalid) }
         
         if self.mcount > 0 &&
@@ -82,7 +83,7 @@ impl<K> InvWork<Item<K>> for Inv<K> {
              { return Err(InvErr::Maxed) }
 
         if self.mweight > 0.0 &&
-            (self.cweight + d.weight) > self.mweight
+            (self.cweight + weight) > self.mweight
         { return Err(InvErr::Maxed) }
 
         
@@ -107,9 +108,19 @@ impl<K> InvWork<Item<K>> for Inv<K> {
     fn remove (&mut self, rid: u32) -> Result<Item<K>,InvErr> {
         if rid == 0 { return Err(InvErr::Invalid) }
         if let Some(v) = self.items.remove(&rid) {
-            self.cweight -= v.weight;
+
+            let mut weight = 0.0;
+            if let Some(w) = v.kind.get_weight() {weight=*w;}
+            
+            self.cweight -= weight;
             Ok(v)
         }
         else { Err(InvErr::Invalid) }
     }
+}
+
+
+pub trait Intrinsics {
+    fn get_weight(&self) -> Option<&f32>;
+    fn get_mut_weight(&mut self) -> Option<&mut f32>;
 }
