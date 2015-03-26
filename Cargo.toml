@@ -9,3 +9,4 @@ repository = "https://github.com/viperscape/rpg"
 
 [dependencies]
 bitflags = "*"
+rand = "*"

@@ -6,13 +6,14 @@ fn main () {
     let mut bag = Inv::new();
     
     let sword = Item::Weapons(Weapon { dmg:10, 
-                                           speed: 2, 
-                                           perks: vec!(),
-                                           base: ItemBase::new("firey",24.0), });
+                                       speed: 2, 
+                                       perks: vec!(),
+                                       base: ItemBase::new("firey",24.0), });
+
     let sword_id = bag.add(sword).unwrap();
 
     let potion = Item::Potions(Potion { base: ItemBase::new("roibos",2.0) });
-    let sword = bag.swap(potion.clone(),sword_id); //swap sword out
+    let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
 
     bag.add(potion); //add a second potion
     println!("{:?}",bag);

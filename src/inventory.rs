@@ -1,3 +1,4 @@
+extern crate rand;
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -15,10 +16,10 @@ pub trait InvWork<T> {
 
     fn remove (&mut self, rid: u32) -> Result<T,InvErr>;
 
-    fn swap (&mut self, d:T, rid: u32) -> Result<T,InvErr> {
+    fn swap (&mut self, d:T, rid: u32) -> Result<(u32,T),InvErr> {
         let r = try!(self.remove(rid));
-        try!(self.add(d));
-        Ok(r)
+        let n = try!(self.add(d));
+        Ok((n,r))
     }
 }
 
@@ -36,7 +37,7 @@ impl ItemBase {
         ItemBase { count: 1,
                    desc: desc.to_string(),
                    weight: weight,
-                   id: 0, }
+                   id: rand::random::<u32>(), }
     }
     pub fn get_id (&self) -> u32 { self.id }
 }
@@ -45,7 +46,6 @@ impl ItemBase {
 #[derive(PartialEq,Debug)]
 pub struct Inv<K> {
     items: HashMap<u32,K>,
-    nid: u32, //next id
     pub mcount: u16, //max count
     pub mweight: f32,
     cweight: f32,
@@ -58,7 +58,6 @@ impl<K> Inv<K> {
     pub fn new () -> Inv<K> {
         Inv { items: HashMap::new(),
               mcount: 0,
-              nid: 0,
               mweight: 0.0,
               cweight: 0.0,
               ccount: 0,
@@ -69,12 +68,12 @@ impl<K> Inv<K> {
     }
 }
 impl<K:Intrinsics> InvWork<K> for Inv<K> {
-    fn add (&mut self, mut d:K) -> Result<u32,InvErr> {
+    fn add (&mut self, d:K) -> Result<u32,InvErr> {
         let id = d.get().get_id();
         let weight = d.get().weight;
         
-        if id == 0 { d.get_mut().id = self.nid; self.nid += 1; }
-        
+        if id == 0 { return Err(InvErr::Invalid) }
+
         if self.mcount > 0 &&
             self.mcount == self.ccount// self.items.len() as u32
              { return Err(InvErr::Maxed) }
@@ -103,7 +102,7 @@ impl<K:Intrinsics> InvWork<K> for Inv<K> {
         Ok(id)
     }
     fn remove (&mut self, rid: u32) -> Result<K,InvErr> {
-        //if rid == 0 { return Err(InvErr::Invalid) }
+        if rid == 0 { return Err(InvErr::Invalid) }
         if let Some(v) = self.items.remove(&rid) {
             self.cweight -= v.get().weight;
             Ok(v)
