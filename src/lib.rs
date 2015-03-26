@@ -4,7 +4,8 @@ extern crate bitflags;
 pub use inventory::{ InvItem,
                      InvWork,
                      InvErr,
-                     Item,
+                     //Item,
                      Inv,
-                     Intrinsics };
+                     Intrinsics,
+                     ItemBase };
 pub mod inventory;

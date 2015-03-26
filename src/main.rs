@@ -1,46 +1,44 @@
 extern crate rpg;
-use rpg::{Inv,InvWork,Item,Intrinsics};
+use rpg::{Inv,InvWork,Intrinsics,ItemBase};
 
 
 fn main () {
     let mut bag = Inv::new();
     
-    let mut sword = Item::new(ItemKind::Weapons(Weapon { dmg:10, speed: 2, weight: 20.0, perks: vec!() }),
-                              1);
-    sword.desc = "firey".to_string();
-    bag.add(sword);
+    let sword = Item::Weapons(Weapon { dmg:10, 
+                                           speed: 2, 
+                                           perks: vec!(),
+                                           base: ItemBase::new("firey",24.0), });
+    let sword_id = bag.add(sword).unwrap();
+
+    let potion = Item::Potions(Potion { base: ItemBase::new("roibos",2.0) });
+    let sword = bag.swap(potion.clone(),sword_id); //swap sword out
+
+    bag.add(potion); //add a second potion
     println!("{:?}",bag);
 
-    
-    let mut potion = Item::new(ItemKind::Potions,2);
-    potion.desc = "roibos".to_string();
-    bag.swap(potion.clone(),1);
-    println!("{:?}",bag);
-    
-    bag.add(potion);
-    println!("{:?}",bag);
+/*Inv { items: {0: Potions(Potion { base: ItemBase { count: 2, desc: "roibos", weight: 2, id: 2 } })}, nid: 3, mcount: 0, mweight: 0, cweight: 4, ccount: 3, layout: [0, 0], dweight: true, dcount: true }*/
 }
 
 
 #[derive(PartialEq,Debug,Clone)]
-enum ItemKind {
+enum Item {
     Weapons(Weapon),
-    Coins,
-    Potions,
+    Potions(Potion),
 }
 
-impl Intrinsics for ItemKind {
-    fn get_weight(&self) -> Option<&f32> {
+impl Intrinsics for Item {
+    fn get(&self) -> &ItemBase {
         match self {
-            &ItemKind::Weapons(ref w) => Some(&w.weight),
-            _ => None,
+            &Item::Weapons(ref w) => &w.base,
+            &Item::Potions(ref p) => &p.base,
         }
     }
 
-    fn get_mut_weight(&mut self) -> Option<&mut f32> {
+    fn get_mut(&mut self) -> &mut ItemBase {
         match self {
-            &mut ItemKind::Weapons(ref mut w) => Some(&mut w.weight),
-            _ => None,
+            &mut Item::Weapons(ref mut w) => &mut w.base,
+            &mut Item::Potions(ref mut p) => &mut p.base,
         }
     }
 }
@@ -50,8 +48,14 @@ struct Weapon {
     dmg: u8,
     speed: u8,
     perks: Vec<Perks>,
-    weight: f32,
+    base: ItemBase,
 }
+
+#[derive(PartialEq,Debug,Clone)]
+struct Potion {
+    base: ItemBase,
+}
+
 
 
 #[derive(PartialEq,Debug,Clone)]
