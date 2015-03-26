@@ -34,12 +34,14 @@ pub struct ItemBase {
     vol: [u8;2],
 }
 impl ItemBase {
-    pub fn new (desc:&str,weight:f32) -> ItemBase {
+    pub fn new (desc:&str,weight:f32, vol: Option<[u8;2]>) -> ItemBase {
+        let mut _vol = [0,0];
+        if let Some(v) = vol { _vol = v; }
         ItemBase { count: 1,
                    desc: desc.to_string(),
                    weight: weight,
                    id: rand::random::<u32>(),
-                   vol: [0,0], }
+                   vol: _vol, }
     }
     pub fn get_id (&self) -> u32 { self.id }
 }
@@ -52,18 +54,20 @@ pub struct Inv<K> {
     pub mweight: f32,
     cweight: f32,
     ccount: u16,
-    layout: [u8;2],
+    vol: [u8;2],
     dweight: bool, //dupe weight logic?
     dcount: bool,
 }
 impl<K:Intrinsics> Inv<K> {
-    pub fn new () -> Inv<K> {
+    pub fn new (vol: Option<[u8;2]>) -> Inv<K> {
+        let mut _vol = [0,0];
+        if let Some(v) = vol { _vol = v; }
         Inv { items: HashMap::new(),
               mcount: 0,
               mweight: 0.0,
               cweight: 0.0,
               ccount: 0,
-              layout: [0,0],
+              vol: _vol,
               dweight: true,
               dcount: true,
         }
@@ -97,15 +101,22 @@ impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
         
         if id == 0 { return Err(InvErr::Invalid) }
 
+        // check count
         if self.mcount > 0 &&
             self.mcount == self.ccount// self.items.len() as u32
              { return Err(InvErr::Maxed) }
 
+
+        // check weight
         if self.mweight > 0.0 &&
             (self.cweight + weight) > self.mweight
         { return Err(InvErr::Maxed) }
 
-        
+
+        // check vol
+        //if self.vol[0] > 0 {}
+        //if self.vol[1] > 0 {}
+
         
         let update = self.items.insert(id,d).is_some();
         if update {
