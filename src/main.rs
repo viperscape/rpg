@@ -13,10 +13,12 @@ fn main () {
     let sword_id = bag.add(sword).unwrap();
 
     let potion = Item::Potions(Potion { base: ItemBase::new("roibos",2.0) });
-    let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
+  //  let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
 
     bag.add(potion); //add a second potion
     println!("{:?}",bag);
+
+    println!("{:?}",bag.sort_desc(false));
 }
 
 

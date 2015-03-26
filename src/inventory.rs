@@ -31,13 +31,15 @@ pub struct ItemBase {
     desc: String,
     weight: f32,
     id: u32,
+    vol: [u8;2],
 }
 impl ItemBase {
     pub fn new (desc:&str,weight:f32) -> ItemBase {
         ItemBase { count: 1,
                    desc: desc.to_string(),
                    weight: weight,
-                   id: rand::random::<u32>(), }
+                   id: rand::random::<u32>(),
+                   vol: [0,0], }
     }
     pub fn get_id (&self) -> u32 { self.id }
 }
@@ -54,7 +56,7 @@ pub struct Inv<K> {
     dweight: bool, //dupe weight logic?
     dcount: bool,
 }
-impl<K> Inv<K> {
+impl<K:Intrinsics> Inv<K> {
     pub fn new () -> Inv<K> {
         Inv { items: HashMap::new(),
               mcount: 0,
@@ -65,6 +67,27 @@ impl<K> Inv<K> {
               dweight: true,
               dcount: true,
         }
+    }
+
+
+    pub fn sort_weight (&self, inv: bool) -> Vec<(&f32,&u32)> {
+        let mut vs = vec!();
+        for (k,v) in self.items.iter() {
+            vs.push((&v.get().weight,k));
+        }
+        if !inv { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
+        else { vs.sort_by(|a,b| b.partial_cmp(a).unwrap()); }
+        vs
+    }
+
+    pub fn sort_desc (&self, inv: bool) -> Vec<(&String,&u32)> {
+        let mut vs = vec!();
+        for (k,v) in self.items.iter() {
+            vs.push((&v.get().desc,k));
+        }
+        if !inv { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
+        else { vs.sort_by(|a,b| b.partial_cmp(a).unwrap()); }
+        vs
     }
 }
 impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
