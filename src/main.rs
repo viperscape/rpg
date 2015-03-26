@@ -17,8 +17,6 @@ fn main () {
 
     bag.add(potion); //add a second potion
     println!("{:?}",bag);
-
-/*Inv { items: {0: Potions(Potion { base: ItemBase { count: 2, desc: "roibos", weight: 2, id: 2 } })}, nid: 3, mcount: 0, mweight: 0, cweight: 4, ccount: 3, layout: [0, 0], dweight: true, dcount: true }*/
 }
 
 

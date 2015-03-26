@@ -67,7 +67,7 @@ impl<K> Inv<K> {
         }
     }
 }
-impl<K:Intrinsics> InvWork<K> for Inv<K> {
+impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
     fn add (&mut self, d:K) -> Result<u32,InvErr> {
         let id = d.get().get_id();
         let weight = d.get().weight;
@@ -101,13 +101,23 @@ impl<K:Intrinsics> InvWork<K> for Inv<K> {
         if uweight { self.cweight += weight; }
         Ok(id)
     }
-    fn remove (&mut self, rid: u32) -> Result<K,InvErr> {
-        if rid == 0 { return Err(InvErr::Invalid) }
-        if let Some(v) = self.items.remove(&rid) {
+    fn remove (&mut self, id: u32) -> Result<K,InvErr> {
+        if id == 0 { return Err(InvErr::Invalid) }
+        let mut update = false;
+        {let base = self.items.get_mut(&id).unwrap().get_mut();
+         if base.count > 1 { 
+             base.count -= 1;
+             if self.dcount { self.ccount -= 1; }
+             if self.dweight { self.cweight -= base.weight; }
+             update = true;
+         }}
+        if !update {
+            let v = self.items.remove(&id).unwrap();
             self.cweight -= v.get().weight;
+            self.ccount -= 1;
             Ok(v)
         }
-        else { Err(InvErr::Invalid) }
+        else { Ok(self.items.get(&id).unwrap().clone()) }
     }
 }
 
