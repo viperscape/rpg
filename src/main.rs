@@ -18,7 +18,7 @@ fn main () {
     bag.add(potion); //add a second potion
     println!("{:?}",bag);
 
-    println!("{:?}",bag.sort_desc(false));
+    println!("{:?}",bag.sort_name(false));
 }
 
 

@@ -28,17 +28,17 @@ pub trait InvWork<T> {
 #[derive(PartialEq,Debug,Clone)]
 pub struct ItemBase {
     count: u16,
-    desc: String,
+    name: String,
     weight: f32,
     id: u32,
     vol: [u8;2],
 }
 impl ItemBase {
-    pub fn new (desc:&str,weight:f32, vol: Option<[u8;2]>) -> ItemBase {
+    pub fn new (name:&str,weight:f32, vol: Option<[u8;2]>) -> ItemBase {
         let mut _vol = [0,0];
         if let Some(v) = vol { _vol = v; }
         ItemBase { count: 1,
-                   desc: desc.to_string(),
+                   name: name.to_string(),
                    weight: weight,
                    id: rand::random::<u32>(),
                    vol: _vol, }
@@ -84,10 +84,10 @@ impl<K:Intrinsics> Inv<K> {
         vs
     }
 
-    pub fn sort_desc (&self, inv: bool) -> Vec<(&String,&u32)> {
+    pub fn sort_name (&self, inv: bool) -> Vec<(&String,&u32)> {
         let mut vs = vec!();
         for (k,v) in self.items.iter() {
-            vs.push((&v.get().desc,k));
+            vs.push((&v.get().name,k));
         }
         if !inv { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
         else { vs.sort_by(|a,b| b.partial_cmp(a).unwrap()); }
