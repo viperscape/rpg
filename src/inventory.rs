@@ -12,7 +12,7 @@ pub enum InvErr {
 pub type InvItem<T> = (u32,T);
 
 pub trait InvWork<T> {
-    fn add (&mut self, d:T) -> Result<u32,InvErr>;
+    fn add (&mut self, mut d:T) -> Result<u32,InvErr>;
 
     fn remove (&mut self, rid: u32) -> Result<T,InvErr>;
 
@@ -23,25 +23,56 @@ pub trait InvWork<T> {
     }
 }
 
-
+pub struct ItemBuild(ItemBase);
+impl ItemBuild {
+    pub fn new () -> ItemBuild {
+        ItemBuild(ItemBase::new("",0.0,[0,0]))
+    }
+    pub fn weight (mut self, w:f32) -> ItemBuild {
+        self.0.weight = w;
+        self
+    }
+    pub fn name (mut self, s:&str) -> ItemBuild {
+        self.0.name = s.to_string();
+        self
+    }
+    pub fn vol (mut self, v:[u8;2]) -> ItemBuild {
+        self.0.vol = v;
+        self
+    }
+    pub fn dupe (mut self, d:bool) -> ItemBuild {
+        if self.0.count == 0 {
+            self.0.dupe = d;
+        }
+        self
+    }
+    pub fn count (mut self, c:u16) -> ItemBuild {
+        self.0.count = c;
+        self.0.dupe = true;
+        self
+    }
+    pub fn build (mut self) -> ItemBase {
+        self.0
+    }
+}
 
 #[derive(PartialEq,Debug,Clone)]
 pub struct ItemBase {
     count: u16,
     name: String,
     weight: f32,
-    id: u32,
+    id: u32, //this will probably be removed unless converted to a uid/u64 that's guaranteeable
     vol: [u8;2],
+    dupe:bool,
 }
 impl ItemBase {
-    pub fn new (name:&str,weight:f32, vol: Option<[u8;2]>) -> ItemBase {
-        let mut _vol = [0,0];
-        if let Some(v) = vol { _vol = v; }
+    pub fn new (name:&str,weight:f32, vol: [u8;2]) -> ItemBase {
         ItemBase { count: 1,
                    name: name.to_string(),
                    weight: weight,
-                   id: rand::random::<u32>(),
-                   vol: _vol, }
+                   id: 0,
+                   vol: vol,
+                   dupe: true, }
     }
     pub fn get_id (&self) -> u32 { self.id }
 }
@@ -95,11 +126,19 @@ impl<K:Intrinsics> Inv<K> {
     }
 }
 impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
-    fn add (&mut self, d:K) -> Result<u32,InvErr> {
-        let id = d.get().get_id();
+    fn add (&mut self, mut d:K) -> Result<u32,InvErr> {
+        //let id = d.get().get_id();
+        //if id == 0 { return Err(InvErr::Invalid) }
+        let mut id: u32;
+        loop {
+            id = rand::random::<u32>();
+            if !self.items.contains_key(&id) { break }
+        }
+
+        d.get_mut().id = id;
+
         let weight = d.get().weight;
         
-        if id == 0 { return Err(InvErr::Invalid) }
 
         // check count
         if self.mcount > 0 &&

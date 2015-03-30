@@ -6,5 +6,6 @@ pub use inventory::{ InvItem,
                      InvErr,
                      Inv,
                      Intrinsics,
-                     ItemBase };
+                     ItemBase,
+                     ItemBuild };
 pub mod inventory;

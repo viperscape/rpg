@@ -1,5 +1,5 @@
 extern crate rpg;
-use rpg::{Inv,InvWork,Intrinsics,ItemBase};
+use rpg::{Inv,InvWork,Intrinsics,ItemBase,ItemBuild};
 
 
 fn main () {
@@ -8,11 +8,17 @@ fn main () {
     let sword = Item::Weapons(Weapon { dmg:10, 
                                        speed: 2, 
                                        perks: vec!(),
-                                       base: ItemBase::new("firey",24.0,Some([2,1])), });
+                                       base: ItemBase::new("firey",24.0,[2,1]), });
+
+    let potion_build = Item::Potions(Potion { base: ItemBuild::new()
+                                             .weight(2.0)
+                                             .name("elixer-57")
+                                             .build() });
+    bag.add(potion_build);
 
     let sword_id = bag.add(sword).unwrap();
 
-    let potion = Item::Potions(Potion { base: ItemBase::new("roibos",2.0,None) });
+    let potion = Item::Potions(Potion { base: ItemBase::new("roibos",2.0,[0,0]) });
   //  let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
 
     bag.add(potion); //add a second potion
