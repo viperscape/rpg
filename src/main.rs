@@ -1,5 +1,5 @@
 extern crate rpg;
-use rpg::{Inv,InvWork,Intrinsics,ItemBase,ItemBuild};
+use rpg::{Inv,InvWork,Intrinsics,ItemBase,BuildBase};
 
 
 fn main () {
@@ -10,7 +10,7 @@ fn main () {
                                        perks: vec!(),
                                        base: ItemBase::new("firey",24.0,[2,1]), });
 
-    let potion_build = Item::Potions(Potion { base: ItemBuild::new()
+    let potion_build = Item::Potions(Potion { base: BuildBase::new()
                                              .weight(2.0)
                                              .name("elixer-57")
                                              .build() });

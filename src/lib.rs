@@ -7,5 +7,5 @@ pub use inventory::{ InvItem,
                      Inv,
                      Intrinsics,
                      ItemBase,
-                     ItemBuild };
+                     BuildBase };
 pub mod inventory;

@@ -23,30 +23,31 @@ pub trait InvWork<T> {
     }
 }
 
-pub struct ItemBuild(ItemBase);
-impl ItemBuild {
-    pub fn new () -> ItemBuild {
-        ItemBuild(ItemBase::new("",0.0,[0,0]))
+// note: consider renaming me
+pub struct BuildBase(ItemBase);
+impl BuildBase {
+    pub fn new () -> BuildBase {
+        BuildBase(ItemBase::new("",0.0,[0,0]))
     }
-    pub fn weight (mut self, w:f32) -> ItemBuild {
+    pub fn weight (mut self, w:f32) -> BuildBase {
         self.0.weight = w;
         self
     }
-    pub fn name (mut self, s:&str) -> ItemBuild {
+    pub fn name (mut self, s:&str) -> BuildBase {
         self.0.name = s.to_string();
         self
     }
-    pub fn vol (mut self, v:[u8;2]) -> ItemBuild {
+    pub fn vol (mut self, v:[u8;2]) -> BuildBase {
         self.0.vol = v;
         self
     }
-    pub fn dupe (mut self, d:bool) -> ItemBuild {
+    pub fn dupe (mut self, d:bool) -> BuildBase {
         if self.0.count == 0 {
             self.0.dupe = d;
         }
         self
     }
-    pub fn count (mut self, c:u16) -> ItemBuild {
+    pub fn count (mut self, c:u16) -> BuildBase {
         self.0.count = c;
         self.0.dupe = true;
         self
