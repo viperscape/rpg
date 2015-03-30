@@ -42,9 +42,8 @@ impl BuildBase {
         self
     }
     pub fn dupe (mut self, d:bool) -> BuildBase {
-        if self.0.count == 0 {
-            self.0.dupe = d;
-        }
+        if !d && self.0.count > 0 { self.0.dupe = true; }
+        else { self.0.dupe = d; }
         self
     }
     pub fn count (mut self, c:u16) -> BuildBase {
