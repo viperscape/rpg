@@ -82,6 +82,9 @@ impl ItemBase {
                    value: Coin(0),  }
     }
     pub fn get_id (&self) -> u32 { self.id }
+    pub fn get_value (&self) -> &Coin {
+        &self.value
+    }
 }
 
 
@@ -110,26 +113,30 @@ impl<K:Intrinsics> Inv<K> {
               dcount: true,
         }
     }
+    pub fn get (&self, id: &u32) -> Option<&K> {
+        self.items.get(id)
+    }
 
-
-    pub fn sort_weight (&self, inv: bool) -> Vec<(&f32,&u32)> {
+    fn sort_by <W:PartialOrd,F:Fn(&ItemBase)->&W> (&self, inv:bool, f:F) -> Vec<(&W,&u32)> {
         let mut vs = vec!();
         for (k,v) in self.items.iter() {
-            vs.push((&v.get().weight,k));
+            vs.push((f(&v.get()),k));
         }
         if !inv { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
         else { vs.sort_by(|a,b| b.partial_cmp(a).unwrap()); }
         vs
     }
 
+    pub fn sort_weight (&self, inv: bool) -> Vec<(&f32,&u32)> {
+        self.sort_by(inv,|ib| &ib.weight)
+    }
+
+    pub fn sort_value (&self,inv:bool) -> Vec<(&Coin,&u32)>  {
+        self.sort_by(inv,|ib| &ib.value)
+    }
+
     pub fn sort_name (&self, inv: bool) -> Vec<(&String,&u32)> {
-        let mut vs = vec!();
-        for (k,v) in self.items.iter() {
-            vs.push((&v.get().name,k));
-        }
-        if !inv { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
-        else { vs.sort_by(|a,b| b.partial_cmp(a).unwrap()); }
-        vs
+        self.sort_by(inv,|ib| &ib.name)
     }
 }
 impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {

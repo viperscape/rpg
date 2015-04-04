@@ -11,7 +11,7 @@ pub use inventory::{ InvItem,
 pub mod inventory;
 pub mod vendor;
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,PartialOrd)]
 pub struct Coin(u16);
 impl PartialEq for Coin {
 	fn eq (&self, other: &Coin) -> bool {
