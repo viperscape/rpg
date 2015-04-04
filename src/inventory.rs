@@ -1,4 +1,5 @@
 extern crate rand;
+use super::{Coin};
 use std::collections::HashMap;
 
 #[derive(Debug)]
@@ -51,6 +52,10 @@ impl BuildBase {
         self.0.dupe = true;
         self
     }
+    pub fn value (mut self, c:u16) -> BuildBase {
+        self.0.value.0 += c;
+        self
+    }
     pub fn build (mut self) -> ItemBase {
         self.0
     }
@@ -64,6 +69,7 @@ pub struct ItemBase {
     id: u32, //this will probably be removed unless converted to a uid/u64 that's guaranteeable
     vol: [u8;2],
     dupe:bool,
+    value: Coin,
 }
 impl ItemBase {
     pub fn new (name:&str,weight:f32, vol: [u8;2]) -> ItemBase {
@@ -72,7 +78,8 @@ impl ItemBase {
                    weight: weight,
                    id: 0,
                    vol: vol,
-                   dupe: true, }
+                   dupe: true,
+                   value: Coin(0),  }
     }
     pub fn get_id (&self) -> u32 { self.id }
 }

@@ -7,3 +7,4 @@ Cargo.lock
 *.bu
 *#*#
 /Cargo.lock
+/tmp*
