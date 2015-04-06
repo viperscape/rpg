@@ -8,11 +8,14 @@ pub use inventory::{ InvItem,
                      Intrinsics,
                      ItemBase,
                      BuildBase };
+pub use vendor:: {  Vendor,
+			    	VendErr };
+
 pub mod inventory;
 pub mod vendor;
 
 #[derive(Debug,Clone,PartialOrd)]
-pub struct Coin(u16);
+pub struct Coin(pub u16);
 impl PartialEq for Coin {
 	fn eq (&self, other: &Coin) -> bool {
 		self.0 == other.0

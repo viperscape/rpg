@@ -10,16 +10,16 @@ pub enum InvErr {
     Invalid,
 }
 
-pub type InvItem<T> = (u32,T);
+pub type InvItem<K> = (u32,K);
 
-pub trait InvWork<T> {
-    fn add (&mut self, mut d:T) -> Result<u32,InvErr>;
+pub trait InvWork<K> {
+    fn add (&mut self, mut k:K) -> Result<u32,InvErr>;
 
-    fn remove (&mut self, rid: u32) -> Result<T,InvErr>;
+    fn remove (&mut self, rid: u32) -> Result<K,InvErr>;
 
-    fn swap (&mut self, d:T, rid: u32) -> Result<(u32,T),InvErr> {
+    fn swap (&mut self, k:K, rid: u32) -> Result<(u32,K),InvErr> {
         let r = try!(self.remove(rid));
-        let n = try!(self.add(d));
+        let n = try!(self.add(k));
         Ok((n,r))
     }
 }
@@ -84,6 +84,9 @@ impl ItemBase {
     pub fn get_id (&self) -> u32 { self.id }
     pub fn get_value (&self) -> &Coin {
         &self.value
+    }
+    pub fn set_value (&mut self, c:Coin) {
+        self.value.0 = c.0;
     }
 }
 
@@ -151,13 +154,12 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
             if val == &k { id = *key; break; }
         }
 
-        //k.get_mut().id = id;
         let weight = k.get().weight;
         
 
         // check count
         if self.mcount > 0 &&
-            self.mcount == self.ccount// self.items.len() as u32
+            self.mcount == self.ccount
              { return Err(InvErr::Maxed) }
 
 
@@ -167,6 +169,7 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
         { return Err(InvErr::Maxed) }
 
 
+        //todo: check volume and flags
         // check vol
         //if self.vol[0] > 0 {}
         //if self.vol[1] > 0 {}
@@ -211,7 +214,7 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
 
 
 pub trait Intrinsics {
-    fn get(&self) -> &ItemBase;
-    fn get_mut(&mut self) -> &mut ItemBase;
+    fn get(&self) -> &ItemBase; //todo: rename to get_base?
+    fn get_mut(&mut self) -> &mut ItemBase; //todo: rename to get_mut_base?
     fn is_like(&self,other:&Self) -> bool;
 }

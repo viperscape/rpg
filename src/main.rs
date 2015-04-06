@@ -1,5 +1,6 @@
 extern crate rpg;
-use rpg::{Inv,InvWork,Intrinsics,ItemBase,BuildBase};
+use rpg::{Inv,InvWork,Intrinsics,ItemBase,BuildBase,
+          Vendor, VendErr, Coin};
 
 
 fn main () {
@@ -10,19 +11,37 @@ fn main () {
                                        perks: vec!(),
                                        base: ItemBase::new("firey",24.0,[2,1]), });
 
-    let potion_build = Item::Potions(Potion { base: BuildBase::new()
+    let potion_elixer = Item::Potions(Potion { base: BuildBase::new()
                                              .weight(2.0)
                                              .name("elixer-57")
+                                             .value(5)
                                              .build() });
-    bag.add(potion_build);
+    bag.add(potion_elixer);
 
     let sword_id = bag.add(sword).unwrap();
 
-    let potion = Item::Potions(Potion { base: ItemBase::new("roibos",2.0,[0,0]) });
-    let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
+    let mut potion_tea = Item::Potions(Potion { base: BuildBase::new()
+                                             .weight(2.0)
+                                             .name("roibos")
+                                             .value(50)
+                                             .build() });
 
-    bag.add(potion.clone()); //add a second potion
-    println!("{:?},{:?}",bag.sort_name(false), bag);
+    let (potion_id,sword) = bag.swap(potion_tea.clone(),sword_id).unwrap(); //swap sword out
+
+    bag.add(potion_tea.clone()); //add a second potion
+    
+    let mut vendor = Vendor::new(2600);
+
+    //build empty potion item, sale-rate is 15% of full-value, 
+    //this vendor does not usually sell potions
+    vendor.rate.push((Item::Potions(Potion { base: BuildBase::new().build() }), 15.0));
+    vendor.add_money(Coin(200));
+
+    let coins = vendor.sell(potion_tea.clone());
+    println!("{:?}",coins); //Coin(7)
+
+    let tea_id = *vendor.get_inv().sort_name(false).first().unwrap().1; //0 is name, 1 is id in tuple
+    println!("{:?}",vendor.buy(tea_id,Coin(6))); //not enough money
 }
 
 
