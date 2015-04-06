@@ -19,11 +19,9 @@ fn main () {
     let sword_id = bag.add(sword).unwrap();
 
     let potion = Item::Potions(Potion { base: ItemBase::new("roibos",2.0,[0,0]) });
-  //  let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
+    let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
 
-    bag.add(potion); //add a second potion
-    println!("{:?}",bag);
-
+    bag.add(potion.clone()); //add a second potion
     println!("{:?}",bag.sort_name(false));
 }
 
@@ -46,6 +44,14 @@ impl Intrinsics for Item {
         match self {
             &mut Item::Weapons(ref mut w) => &mut w.base,
             &mut Item::Potions(ref mut p) => &mut p.base,
+        }
+    }
+
+    fn is_like(&self,other:&Item) -> bool {
+        match (self,other) {
+            (&Item::Weapons(_), &Item::Weapons(_)) => true,
+            (&Item::Potions(_), &Item::Potions(_)) => true,
+            _ => false,
         }
     }
 }

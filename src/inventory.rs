@@ -140,18 +140,19 @@ impl<K:Intrinsics> Inv<K> {
     }
 }
 impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
-    fn add (&mut self, mut d:K) -> Result<u32,InvErr> {
-        //let id = d.get().get_id();
-        //if id == 0 { return Err(InvErr::Invalid) }
+    fn add (&mut self, mut k:K) -> Result<u32,InvErr> {
         let mut id: u32;
         loop {
             id = rand::random::<u32>();
             if !self.items.contains_key(&id) { break }
         }
 
-        d.get_mut().id = id;
+        for (key,val) in self.items.iter() {
+            // todo: check already added and cmp-- to stack item
+        }
 
-        let weight = d.get().weight;
+        k.get_mut().id = id;
+        let weight = k.get().weight;
         
 
         // check count
@@ -171,7 +172,7 @@ impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
         //if self.vol[1] > 0 {}
 
         
-        let update = self.items.insert(id,d).is_some();
+        let update = self.items.insert(id,k).is_some();
         if update {
             self.items.get_mut(&id).unwrap().get_mut().count += 1;
         }
@@ -212,4 +213,5 @@ impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
 pub trait Intrinsics {
     fn get(&self) -> &ItemBase;
     fn get_mut(&mut self) -> &mut ItemBase;
+    fn is_like(&self,other:&Self) -> bool;
 }
