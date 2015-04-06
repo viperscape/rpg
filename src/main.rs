@@ -22,7 +22,7 @@ fn main () {
     let (potion_id,sword) = bag.swap(potion.clone(),sword_id).unwrap(); //swap sword out
 
     bag.add(potion.clone()); //add a second potion
-    println!("{:?}",bag.sort_name(false));
+    println!("{:?},{:?}",bag.sort_name(false), bag);
 }
 
 

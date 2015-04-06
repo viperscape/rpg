@@ -139,7 +139,7 @@ impl<K:Intrinsics> Inv<K> {
         self.sort_by(inv,|ib| &ib.name)
     }
 }
-impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
+impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
     fn add (&mut self, mut k:K) -> Result<u32,InvErr> {
         let mut id: u32;
         loop {
@@ -148,10 +148,10 @@ impl<K:Intrinsics+Clone> InvWork<K> for Inv<K> {
         }
 
         for (key,val) in self.items.iter() {
-            // todo: check already added and cmp-- to stack item
+            if val == &k { id = *key; break; }
         }
 
-        k.get_mut().id = id;
+        //k.get_mut().id = id;
         let weight = k.get().weight;
         
 
