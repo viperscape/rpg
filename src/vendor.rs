@@ -38,7 +38,7 @@ impl<K:Intrinsics+Clone+PartialEq> Vendor<K> {
 		let mut cost;
 
 		if let Some(k) = inv.get(&id) {
-			if let Some(_rate) = self.rate.get(&k.get_typeid()) {
+			if let Some(_rate) = self.rate.get(&k.get().get_typeid().unwrap()) {
 				rate = *_rate;
 			}
 			else { return Err(VendErr::Inv(InvErr::Invalid)) } //need to initialize typeid first!
@@ -63,7 +63,7 @@ impl<K:Intrinsics+Clone+PartialEq> Vendor<K> {
 		//if let Some(_rate) = self.rate.get(&id) { rate=*_rate }
 
 		if let Some(item) = self.inv.get(&id) {
-			if let Some(_rate) = self.rate.get(&item.get_typeid()) {
+			if let Some(_rate) = self.rate.get(&item.get().get_typeid().unwrap()) {
 				rate = *_rate;
 			}
 			else { return Err(VendErr::Inv(InvErr::Invalid)) } //this is likely never to be an issue, since its in vendors possession and thus initialized

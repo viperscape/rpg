@@ -1,7 +1,8 @@
 extern crate rand;
 use super::{Coin};
 use std::collections::HashMap;
-use std::any::TypeId;
+use std::any::{Any,TypeId};
+use std::marker::Reflect;
 
 #[derive(Debug)]
 pub enum InvErr {
@@ -28,8 +29,8 @@ pub trait InvWork<K> {
 // note: consider renaming me
 pub struct BuildBase(ItemBase);
 impl BuildBase {
-    pub fn new () -> BuildBase {
-        BuildBase(ItemBase::new("",0.0,[0,0]))
+    pub fn new<T:Reflect+'static> () -> BuildBase {
+        BuildBase(ItemBase::new::<T>("",0.0,[0,0]))
     }
     pub fn weight (mut self, w:f32) -> BuildBase {
         self.0.weight = w;
@@ -73,16 +74,21 @@ pub struct ItemBase {
     value: Coin,
 }
 impl ItemBase {
-    pub fn new (name:&str,weight:f32, vol: [u8;2]) -> ItemBase {
+    pub fn new<T:Reflect+'static> (name:&str,weight:f32, vol: [u8;2]) -> ItemBase {
         ItemBase { count: 1,
                    name: name.to_string(),
                    weight: weight,
-                   typeid: None,
+                   typeid: Some(TypeId::of::<T>()),
                    vol: vol,
                    dupe: true,
                    value: Coin(0),  }
     }
     pub fn get_typeid (&self) -> Option<TypeId> { self.typeid }
+    pub fn set_typeid<T:Reflect+'static> (&mut self) -> TypeId { 
+        let mut typeid = TypeId::of::<T>(); 
+        self.typeid = Some(typeid);
+        typeid
+    }
     pub fn get_value (&self) -> &Coin {
         &self.value
     }
@@ -145,11 +151,12 @@ impl<K:Intrinsics> Inv<K> {
 }
 impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
     fn add (&mut self, mut k:K) -> Result<u32,InvErr> {
-        let typeid = k.get_typeid().clone();
+        //k.get_mut().set_typeid();
+        /*let typeid = k.get_typeid().clone();
         {let mut base = k.get_mut();
          if !base.typeid.is_some() {
             base.typeid = Some(typeid);  //if reflection id is not set, set it
-        }}
+        }}*/
 
         let mut id: u32;
         loop {
@@ -223,6 +230,6 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
 pub trait Intrinsics {
     fn get(&self) -> &ItemBase; //todo: rename to get_base?
     fn get_mut(&mut self) -> &mut ItemBase; //todo: rename to get_mut_base?
-    fn is_like(&self,other:&Self) -> bool;
-    fn get_typeid(&self) -> TypeId;
+    //fn is_like(&self,other:&Self) -> bool;
+    //fn get_typeid(&self) -> TypeId;
 }

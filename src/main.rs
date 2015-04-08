@@ -3,16 +3,16 @@
 extern crate rpg;
 use rpg::{Inv,InvWork,Intrinsics,ItemBase,BuildBase,
           Vendor, VendErr, Coin};
-use std::any::{Any,TypeId};
+//use std::any::{Any,TypeId};
 
 fn main () {
     let mut bag = Inv::new(Some([10,10]));
     
     let sword = Item::Weapons(Weapon { attr: vec!(WeaponBase::Speed(10),WeaponBase::Dmg(15)),
                                        perks: vec!(),
-                                       base: ItemBase::new("firey",24.0,[2,1]), });
+                                       base: ItemBase::new::<Weapon>("firey",24.0,[2,1]), });
 
-    let potion_elixer = Item::Potions(Potion { base: BuildBase::new()
+    let potion_elixer = Item::Potions(Potion { base: BuildBase::new::<Potion>()
                                              .weight(2.0)
                                              .name("elixer-57")
                                              .value(5)
@@ -21,7 +21,7 @@ fn main () {
 
     let sword_id = bag.add(sword).unwrap();
 
-    let mut potion_tea = Item::Potions(Potion { base: BuildBase::new()
+    let mut potion_tea = Item::Potions(Potion { base: BuildBase::new::<Potion>()
                                              .weight(2.0)
                                              .name("roibos")
                                              .value(50)
@@ -69,7 +69,7 @@ impl Intrinsics for Item {
         }
     }
 
-    fn is_like(&self,other:&Item) -> bool {
+    /*fn is_like(&self,other:&Item) -> bool {
         match (self,other) {
             (&Item::Weapons(_), &Item::Weapons(_)) => true,
             (&Item::Potions(_), &Item::Potions(_)) => true,
@@ -82,7 +82,7 @@ impl Intrinsics for Item {
             &Item::Weapons(ref w) => w.get_type_id(),
             &Item::Potions(ref p) => p.get_type_id(),
         }
-    }
+    }*/
 }
 
 #[derive(PartialEq,Debug,Clone)]
