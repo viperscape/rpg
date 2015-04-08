@@ -1,13 +1,14 @@
+#![feature(core)]
+
 extern crate rpg;
 use rpg::{Inv,InvWork,Intrinsics,ItemBase,BuildBase,
           Vendor, VendErr, Coin};
-
+use std::any::{Any,TypeId};
 
 fn main () {
     let mut bag = Inv::new(Some([10,10]));
     
-    let sword = Item::Weapons(Weapon { dmg:10, 
-                                       speed: 2, 
+    let sword = Item::Weapons(Weapon { attr: vec!(WeaponBase::Speed(10),WeaponBase::Dmg(15)),
                                        perks: vec!(),
                                        base: ItemBase::new("firey",24.0,[2,1]), });
 
@@ -28,18 +29,20 @@ fn main () {
 
     let (potion_id,sword) = bag.swap(potion_tea.clone(),sword_id).unwrap(); //swap sword out
 
-    bag.add(potion_tea.clone()); //add a second potion
+    bag.add(potion_tea); //add a second potion of same kind
     
     let mut vendor = Vendor::new(2600);
 
-    //build empty potion item, sale-rate is 15% of full-value, 
+    //build empty potion item, sale-rate is 15% of full-value for potions, 
     //this vendor does not usually sell potions
-    vendor.rate.push((Item::Potions(Potion { base: BuildBase::new().build() }), 15.0));
+    vendor.add_rate::<Potion>(15.0);
+    vendor.add_rate::<Weapon>(75.0);
     vendor.add_money(Coin(200));
 
-    let coins = vendor.sell(potion_tea.clone());
-    println!("{:?}",coins); //Coin(7)
+    let coins = vendor.sell(potion_id,&mut bag);
+    println!("{:?}",coins); //Ok(Coin(7))
 
+    //pick first item from vendor, and try and buy
     let tea_id = *vendor.get_inv().sort_name(false).first().unwrap().1; //0 is name, 1 is id in tuple
     println!("{:?}",vendor.buy(tea_id,Coin(6))); //not enough money
 }
@@ -73,12 +76,18 @@ impl Intrinsics for Item {
             _ => false,
         }
     }
+
+    fn get_typeid (&self) -> TypeId {
+        match self {
+            &Item::Weapons(ref w) => w.get_type_id(),
+            &Item::Potions(ref p) => p.get_type_id(),
+        }
+    }
 }
 
 #[derive(PartialEq,Debug,Clone)]
 struct Weapon {
-    dmg: u8,
-    speed: u8,
+    attr: Vec<WeaponBase>,
     perks: Vec<Perks>,
     base: ItemBase,
 }
@@ -92,12 +101,11 @@ struct Potion {
 
 #[derive(PartialEq,Debug,Clone)]
 enum Perks {
-    Weapons(WeaponPerks),
-//    Potions(PotionPerks),
+    Weapons(WeaponBase),
 }
 
 #[derive(PartialEq,Debug,Clone)]
-enum WeaponPerks {
+enum WeaponBase {
     Speed(u8),
     Dmg(u8),
 }

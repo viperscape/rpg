@@ -1,4 +1,7 @@
 use super::{Coin,Inv,InvErr,InvWork,Intrinsics};
+use std::collections::HashMap;
+use std::any::TypeId;
+use std::marker::Reflect;
 
 #[derive(Debug)]
 pub enum VendErr {
@@ -16,7 +19,7 @@ impl VendErr {
 #[derive(Debug)]
 pub struct Vendor<K> {
 	inv: Inv<K>,
-	pub rate: Vec<(K,f32)>, //use intrinsic is_like to compare, this would contain empty types of K
+	pub rate: HashMap<TypeId,f32>, //use intrinsic is_like to compare, this would contain empty types of K
 	pub money: Coin,
 	cycle: u16, //time between restock
 }
@@ -24,39 +27,46 @@ pub struct Vendor<K> {
 impl<K:Intrinsics+Clone+PartialEq> Vendor<K> {
 	pub fn new (dt: u16) -> Vendor<K> {
 		Vendor{ inv: Inv::<K>::new(None),
-				rate: Vec::new(),
+				rate: HashMap::new(),
 				money: Coin(0),
 				cycle: dt, }
 	}
 
 	/// player sells to vendor
-	pub fn sell (&mut self, k: K) -> Result<u16,VendErr> {
-		let mut rate = 1.0;
-		//if let Some(_rate) = self.rate.get(&k.get().get_id()) { rate=*_rate }
-		for &(ref key,val) in self.rate.iter() {
-			if key.is_like(&k) { rate = val; break; }
+	pub fn sell (&mut self, id: u32, inv: &mut Inv<K>) -> Result<Coin,VendErr> {
+		let mut rate = 100.0;
+		let mut cost;
+
+		if let Some(k) = inv.get(&id) {
+			if let Some(_rate) = self.rate.get(&k.get_typeid()) {
+				rate = *_rate;
+			}
+			else { return Err(VendErr::Inv(InvErr::Invalid)) } //need to initialize typeid first!
+
+			let value = k.get().get_value().0 as f32;
+			cost = (value * (rate/100.0)) as u16;
+
+			if (self.money.0 - cost) < 1 { return Err(VendErr::Money) }
+
+			try!(self.inv.add(k.clone()).map_err(VendErr::from_inv));
+			self.money.0 -= cost;
 		}
+		else { return Err(VendErr::Inv(InvErr::Invalid)) }
 
-		let value = k.get().get_value().0 as f32;
-		let cost = (value * (rate/100.0)) as u16;
-
-		if (self.money.0 - cost) < 1 { return Err(VendErr::Money) }
-
-		try!(self.inv.add(k).map_err(VendErr::from_inv));
-		self.money.0 -= cost;
-
-		Ok(cost)
+		inv.remove(id);
+		Ok(Coin(cost))
 	}
 
 	/// player buys from vendor
 	pub fn buy (&mut self, id: u32, c: Coin) -> Result<K,VendErr> {
-		let mut rate = 1.0;
+		let mut rate = 100.0;
 		//if let Some(_rate) = self.rate.get(&id) { rate=*_rate }
 
 		if let Some(item) = self.inv.get(&id) {
-			for &(ref key,val) in self.rate.iter() {
-				if key.is_like(&item) { rate = val; break; }
+			if let Some(_rate) = self.rate.get(&item.get_typeid()) {
+				rate = *_rate;
 			}
+			else { return Err(VendErr::Inv(InvErr::Invalid)) } //this is likely never to be an issue, since its in vendors possession and thus initialized
 
 			let value = item.get().get_value().0 as f32;
 			if (c.0 as f32) < ((rate/100.0) * value) { return Err(VendErr::Money) }
@@ -74,5 +84,9 @@ impl<K:Intrinsics+Clone+PartialEq> Vendor<K> {
 
 	pub fn get_inv(&self) -> &Inv<K> {
 		&self.inv
+	}
+
+	pub fn add_rate<T:Reflect+'static>(&mut self, rate:f32) {
+		self.rate.insert(TypeId::of::<T>(),rate);
 	}
 }

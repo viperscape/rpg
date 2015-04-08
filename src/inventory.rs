@@ -1,6 +1,7 @@
 extern crate rand;
 use super::{Coin};
 use std::collections::HashMap;
+use std::any::TypeId;
 
 #[derive(Debug)]
 pub enum InvErr {
@@ -66,7 +67,7 @@ pub struct ItemBase {
     count: u16,
     name: String,
     weight: f32,
-    id: u32, //this will probably be removed unless converted to a uid/u64 that's guaranteeable
+    typeid: Option<TypeId>, //this will probably be removed unless converted to a uid/u64 that's guaranteeable
     vol: [u8;2],
     dupe:bool,
     value: Coin,
@@ -76,12 +77,12 @@ impl ItemBase {
         ItemBase { count: 1,
                    name: name.to_string(),
                    weight: weight,
-                   id: 0,
+                   typeid: None,
                    vol: vol,
                    dupe: true,
                    value: Coin(0),  }
     }
-    pub fn get_id (&self) -> u32 { self.id }
+    pub fn get_typeid (&self) -> Option<TypeId> { self.typeid }
     pub fn get_value (&self) -> &Coin {
         &self.value
     }
@@ -144,6 +145,12 @@ impl<K:Intrinsics> Inv<K> {
 }
 impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
     fn add (&mut self, mut k:K) -> Result<u32,InvErr> {
+        let typeid = k.get_typeid().clone();
+        {let mut base = k.get_mut();
+         if !base.typeid.is_some() {
+            base.typeid = Some(typeid);  //if reflection id is not set, set it
+        }}
+
         let mut id: u32;
         loop {
             id = rand::random::<u32>();
@@ -217,4 +224,5 @@ pub trait Intrinsics {
     fn get(&self) -> &ItemBase; //todo: rename to get_base?
     fn get_mut(&mut self) -> &mut ItemBase; //todo: rename to get_mut_base?
     fn is_like(&self,other:&Self) -> bool;
+    fn get_typeid(&self) -> TypeId;
 }
