@@ -1,32 +1,35 @@
-#![feature(core)]
-
 extern crate rpg;
-use rpg::{Inv,InvWork,Intrinsics,ItemBase,BuildBase,
-          Vendor, VendErr, Coin};
-//use std::any::{Any,TypeId};
+use rpg::{Inv,InvWork,BuildBase,
+          Vendor, VendErr, Coin, Item};
 
 fn main () {
     let mut bag = Inv::new(Some([10,10]));
     
-    let sword = Item::Weapons(Weapon { attr: vec!(WeaponBase::Speed(10),WeaponBase::Dmg(15)),
-                                       perks: vec!(),
-                                       base: ItemBase::new::<Weapon>("firey",24.0,[2,1]), });
+    let sword = Item::new(Items::Weapons(Weapon { attr: vec!(WeaponBase::Speed(10),WeaponBase::Dmg(15)),
+                                                  perks: vec!(), }),
+                          BuildBase::new::<Weapon>()
+                          .name("firey")
+                          .weight(24.0)
+                          .vol([2,1])
+                          .build());
 
-    let potion_elixer = Item::Potions(Potion { base: BuildBase::new::<Potion>()
-                                             .weight(2.0)
-                                             .name("elixer-57")
-                                             .value(5)
-                                             .build() });
+    let potion_elixer = Item::new(Items::Potions(Potion { perks: vec!(), }),
+                                  BuildBase::new::<Potion>()
+                                  .weight(2.0)
+                                  .name("elixer-57")
+                                  .value(5)
+                                  .build());
     bag.add(potion_elixer);
 
     let sword_id = bag.add(sword).unwrap();
 
-    let mut potion_tea = Item::Potions(Potion { base: BuildBase::new::<Potion>()
-                                             .weight(2.0)
-                                             .name("roibos")
-                                             .value(50)
-                                             .build() });
-
+    let potion_tea = Item::new(Items::Potions(Potion { perks: vec!(), }),
+                                   BuildBase::new::<Potion>()
+                                   .weight(2.0)
+                                   .name("roibos")
+                                   .value(50)
+                                   .build());
+    
     let (potion_id,sword) = bag.swap(potion_tea.clone(),sword_id).unwrap(); //swap sword out
 
     bag.add(potion_tea); //add a second potion of same kind
@@ -47,54 +50,21 @@ fn main () {
     println!("{:?}",vendor.buy(tea_id,Coin(6))); //not enough money
 }
 
-
 #[derive(PartialEq,Debug,Clone)]
-enum Item {
-    Weapons(Weapon),
+enum Items {
     Potions(Potion),
-}
-
-impl Intrinsics for Item {
-    fn get(&self) -> &ItemBase {
-        match self {
-            &Item::Weapons(ref w) => &w.base,
-            &Item::Potions(ref p) => &p.base,
-        }
-    }
-
-    fn get_mut(&mut self) -> &mut ItemBase {
-        match self {
-            &mut Item::Weapons(ref mut w) => &mut w.base,
-            &mut Item::Potions(ref mut p) => &mut p.base,
-        }
-    }
-
-    /*fn is_like(&self,other:&Item) -> bool {
-        match (self,other) {
-            (&Item::Weapons(_), &Item::Weapons(_)) => true,
-            (&Item::Potions(_), &Item::Potions(_)) => true,
-            _ => false,
-        }
-    }
-
-    fn get_typeid (&self) -> TypeId {
-        match self {
-            &Item::Weapons(ref w) => w.get_type_id(),
-            &Item::Potions(ref p) => p.get_type_id(),
-        }
-    }*/
+    Weapons(Weapon),
 }
 
 #[derive(PartialEq,Debug,Clone)]
 struct Weapon {
     attr: Vec<WeaponBase>,
     perks: Vec<Perks>,
-    base: ItemBase,
 }
 
 #[derive(PartialEq,Debug,Clone)]
 struct Potion {
-    base: ItemBase,
+    perks: Vec<Perks>,
 }
 
 

@@ -10,11 +10,14 @@ pub use inventory::{ InvItem,
                      Intrinsics,
                      ItemBase,
                      BuildBase };
-pub use vendor:: {  Vendor,
-			    	VendErr };
+pub use vendor::{ Vendor,
+		  VendErr };
+
+pub use item::{ Item, };
 
 pub mod inventory;
 pub mod vendor;
+pub mod item;
 
 #[derive(Debug,Clone,PartialOrd)]
 pub struct Coin(pub u16);

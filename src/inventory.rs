@@ -1,7 +1,7 @@
 extern crate rand;
 use super::{Coin};
 use std::collections::HashMap;
-use std::any::{Any,TypeId};
+use std::any::TypeId;
 use std::marker::Reflect;
 
 #[derive(Debug)]
@@ -58,7 +58,7 @@ impl BuildBase {
         self.0.value.0 += c;
         self
     }
-    pub fn build (mut self) -> ItemBase {
+    pub fn build (self) -> ItemBase {
         self.0
     }
 }
@@ -85,7 +85,7 @@ impl ItemBase {
     }
     pub fn get_typeid (&self) -> Option<TypeId> { self.typeid }
     pub fn set_typeid<T:Reflect+'static> (&mut self) -> TypeId { 
-        let mut typeid = TypeId::of::<T>(); 
+        let typeid = TypeId::of::<T>(); 
         self.typeid = Some(typeid);
         typeid
     }
@@ -130,7 +130,7 @@ impl<K:Intrinsics> Inv<K> {
     fn sort_by <W:PartialOrd,F:Fn(&ItemBase)->&W> (&self, inv:bool, f:F) -> Vec<(&W,&u32)> {
         let mut vs = vec!();
         for (k,v) in self.items.iter() {
-            vs.push((f(&v.get()),k));
+            vs.push((f(&v.get_base()),k));
         }
         if !inv { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
         else { vs.sort_by(|a,b| b.partial_cmp(a).unwrap()); }
@@ -150,14 +150,7 @@ impl<K:Intrinsics> Inv<K> {
     }
 }
 impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
-    fn add (&mut self, mut k:K) -> Result<u32,InvErr> {
-        //k.get_mut().set_typeid();
-        /*let typeid = k.get_typeid().clone();
-        {let mut base = k.get_mut();
-         if !base.typeid.is_some() {
-            base.typeid = Some(typeid);  //if reflection id is not set, set it
-        }}*/
-
+    fn add (&mut self, k:K) -> Result<u32,InvErr> {
         let mut id: u32;
         loop {
             id = rand::random::<u32>();
@@ -168,13 +161,13 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
             if val == &k { id = *key; break; }
         }
 
-        let weight = k.get().weight;
+        let weight = k.get_base().weight;
         
 
         // check count
         if self.mcount > 0 &&
             self.mcount == self.ccount
-             { return Err(InvErr::Maxed) }
+        { return Err(InvErr::Maxed) }
 
 
         // check weight
@@ -191,7 +184,7 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
         
         let update = self.items.insert(id,k).is_some();
         if update {
-            self.items.get_mut(&id).unwrap().get_mut().count += 1;
+            self.items.get_mut(&id).unwrap().get_mut_base().count += 1;
         }
 
         
@@ -209,7 +202,7 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
     fn remove (&mut self, id: u32) -> Result<K,InvErr> {
         if id == 0 { return Err(InvErr::Invalid) }
         let mut update = false;
-        {let base = self.items.get_mut(&id).unwrap().get_mut();
+        {let base = self.items.get_mut(&id).unwrap().get_mut_base();
          if base.count > 1 { 
              base.count -= 1;
              if self.dcount { self.ccount -= 1; }
@@ -218,7 +211,7 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
          }}
         if !update {
             let v = self.items.remove(&id).unwrap();
-            self.cweight -= v.get().weight;
+            self.cweight -= v.get_base().weight;
             self.ccount -= 1;
             Ok(v)
         }
@@ -228,8 +221,6 @@ impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
 
 
 pub trait Intrinsics {
-    fn get(&self) -> &ItemBase; //todo: rename to get_base?
-    fn get_mut(&mut self) -> &mut ItemBase; //todo: rename to get_mut_base?
-    //fn is_like(&self,other:&Self) -> bool;
-    //fn get_typeid(&self) -> TypeId;
+    fn get_base(&self) -> &ItemBase;
+    fn get_mut_base(&mut self) -> &mut ItemBase;
 }
