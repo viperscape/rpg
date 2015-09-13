@@ -1,6 +1,6 @@
 extern crate rpg;
 use rpg::{Inv,InvWork,BuildBase,
-          Vendor, VendErr, Coin, Item};
+          Vendor, Coin, Item};
 
 fn main () {
     let mut bag = Inv::new(Some([10,10]));
@@ -19,7 +19,7 @@ fn main () {
                                   .name("elixer-57")
                                   .value(5)
                                   .build());
-    bag.add(potion_elixer);
+    let _ = bag.add(potion_elixer);
 
     let sword_id = bag.add(sword).unwrap();
 
@@ -30,9 +30,9 @@ fn main () {
                                    .value(50)
                                    .build());
     
-    let (potion_id,sword) = bag.swap(potion_tea.clone(),sword_id).unwrap(); //swap sword out
+    let (potion_id,_sword) = bag.swap(potion_tea.clone(),sword_id).unwrap(); //swap sword out
 
-    bag.add(potion_tea); //add a second potion of same kind
+    let _ = bag.add(potion_tea); //add a second potion of same kind
     
     let mut vendor = Vendor::new(2600);
 
@@ -68,7 +68,7 @@ struct Potion {
 }
 
 
-
+#[allow(dead_code)]
 #[derive(PartialEq,Debug,Clone)]
 enum Perks {
     Weapons(WeaponBase),

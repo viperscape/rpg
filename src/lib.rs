@@ -1,7 +1,4 @@
-#![feature(core)]
-
-#[macro_use]
-extern crate bitflags;
+#![feature(reflect_marker)]
 
 pub use inventory::{ InvItem,
                      InvWork,
