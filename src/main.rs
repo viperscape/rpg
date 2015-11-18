@@ -40,14 +40,14 @@ fn main () {
     //this vendor does not usually sell potions
     vendor.add_rate::<Potion>(15.0);
     vendor.add_rate::<Weapon>(75.0);
-    vendor.add_money(Coin(200));
+    vendor.add_money(200);
 
     let coins = vendor.sell(potion_id,&mut bag);
     println!("{:?}",coins); //Ok(Coin(7))
 
     //pick first item from vendor, and try and buy
     let tea_id = *vendor.get_inv().sort_name(false).first().unwrap().1; //0 is name, 1 is id in tuple
-    println!("{:?}",vendor.buy(tea_id,Coin(6))); //not enough money
+    println!("{:?}",vendor.buy(tea_id,6)); //not enough money
 }
 
 #[derive(PartialEq,Debug,Clone)]

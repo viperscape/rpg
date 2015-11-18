@@ -28,7 +28,7 @@ impl<K:Intrinsics+Clone+PartialEq> Vendor<K> {
     pub fn new (dt: u16) -> Vendor<K> {
 	Vendor{ inv: Inv::<K>::new(None),
 		rate: HashMap::new(),
-		money: Coin(0),
+		money: 0,
 		cycle: dt, }
     }
 
@@ -43,18 +43,18 @@ impl<K:Intrinsics+Clone+PartialEq> Vendor<K> {
 	    }
 	    else { return Err(VendErr::Inv(InvErr::Invalid)) } //need to initialize typeid first!
 
-	    let value = k.get_base().get_value().0 as f32;
+	    let value = *k.get_base().get_value() as f32;
 	    cost = (value * (rate/100.0)) as u16;
 
-	    if (self.money.0 - cost) < 1 { return Err(VendErr::Money) }
+	    if (self.money - cost) < 1 { return Err(VendErr::Money) }
 
 	    try!(self.inv.add(k.clone()).map_err(VendErr::from_inv));
-	    self.money.0 -= cost;
+	    self.money -= cost;
 	}
 	else { return Err(VendErr::Inv(InvErr::Invalid)) }
 
 	inv.remove(id);
-	Ok(Coin(cost))
+	Ok(cost)
     }
 
     /// player buys from vendor
@@ -68,18 +68,18 @@ impl<K:Intrinsics+Clone+PartialEq> Vendor<K> {
 	    }
 	    else { return Err(VendErr::Inv(InvErr::Invalid)) } //this is likely never to be an issue, since its in vendors possession and thus initialized
 
-	    let value = item.get_base().get_value().0 as f32;
-	    if (c.0 as f32) < ((rate/100.0) * value) { return Err(VendErr::Money) }
+	    let value = *item.get_base().get_value() as f32;
+	    if (c as f32) < ((rate/100.0) * value) { return Err(VendErr::Money) }
 	}
 	else { return Err(VendErr::Inv(InvErr::Invalid)) }
 
 	let r = try!(self.inv.remove(id).map_err(VendErr::from_inv));
-	self.money.0 += c.0;
+	self.money += c;
 	Ok(r)
     }
 
     pub fn add_money (&mut self, c:Coin) {
-	self.money.0 += c.0
+	self.money += c
     }
 
     pub fn get_inv(&self) -> &Inv<K> {

@@ -55,7 +55,7 @@ impl BuildBase {
         self
     }
     pub fn value (mut self, c:u16) -> BuildBase {
-        self.0.value.0 += c;
+        self.0.value += c;
         self
     }
     pub fn build (self) -> ItemBase {
@@ -81,7 +81,7 @@ impl ItemBase {
                    typeid: Some(TypeId::of::<T>()),
                    vol: vol,
                    dupe: true,
-                   value: Coin(0),  }
+                   value: 0,  }
     }
     pub fn get_typeid (&self) -> Option<TypeId> { self.typeid }
     pub fn set_typeid<T:Reflect+'static> (&mut self) -> TypeId { 
@@ -93,7 +93,7 @@ impl ItemBase {
         &self.value
     }
     pub fn set_value (&mut self, c:Coin) {
-        self.value.0 = c.0;
+        self.value = c;
     }
 }
 
