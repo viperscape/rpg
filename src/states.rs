@@ -41,18 +41,21 @@ pub enum Actions {
     Org, // organizing
     
     Closing,
-    Opening,
+    Opening(Box<Actions>),
 }
 
 impl Actions {
     pub fn next(self) -> Actions {
         match self {
             Actions::Dropping => Actions::Closing,
+            
             Actions::Bartering |
             Actions::Using |
-            Actions::Org |
-            Actions::Opening => Actions::Closing,
-            
+            Actions::Org => Actions::Closing,
+
+            Actions::Opening(next) => {
+                *next
+            },
             _ => self,
         }
     }
