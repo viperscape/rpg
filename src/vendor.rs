@@ -19,8 +19,8 @@ impl VendErr {
 #[derive(Debug)]
 pub struct Vendor<K> {
     inv: Inv<K>,
-    pub rate: HashMap<TypeId,f32>, //use intrinsic is_like to compare, this would contain empty types of K
-    pub money: Coin,
+    rate: HashMap<TypeId,f32>,
+    money: Coin,
     cycle: u16, //time between restock
 }
 
