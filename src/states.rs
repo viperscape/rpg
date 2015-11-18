@@ -11,9 +11,24 @@ impl States {
         if *self == States::Closed { true }
         else { false }
     }
-    pub fn start (&mut self, action: Actions) {
-        if *self == States::Closed {
-            *self = States::Opened(action.next());
+    pub fn next (self, act: Actions) -> States {
+        match self {
+            States::Closed => {
+                States::Opened(act)
+            },
+            States::Opened(actions) => {
+                let next = actions.next();
+                
+                match next {
+                    Actions::Closing => {
+                        match act {
+                            Actions::Closing => States::Closed,
+                            _ => States::Opened(act),
+                        }
+                    },
+                    _ => States::Opened(next.next()),
+                }
+            }
         }
     }
 }
@@ -21,8 +36,7 @@ impl States {
 #[derive(Debug,Clone,PartialEq)]
 pub enum Actions {
     Dropping,
-    Selling,
-    Buying,
+    Bartering,
     Using,
     Org, // organizing
     
@@ -34,11 +48,10 @@ impl Actions {
     pub fn next(self) -> Actions {
         match self {
             Actions::Dropping => Actions::Closing,
-            Actions::Selling |
-            Actions::Buying |
+            Actions::Bartering |
             Actions::Using |
-            Actions::Org =>
-                Actions::Opening,
+            Actions::Org |
+            Actions::Opening => Actions::Closing,
             
             _ => self,
         }

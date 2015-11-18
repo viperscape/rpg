@@ -50,7 +50,11 @@ fn main () {
     println!("{:?}",vendor.buy(tea_id,6)); //not enough money
 
     let mut state = States::Closed;
-    state.start(Actions::Using);
+    state = state.next(Actions::Using);
+    println!("{:?}",state);
+    state = state.next(Actions::Bartering);
+    println!("{:?}",state);
+    state = state.next(Actions::Closing);
     println!("{:?}",state);
 }
 
