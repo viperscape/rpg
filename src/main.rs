@@ -1,6 +1,6 @@
 extern crate rpg;
 use rpg::{Inv,InvWork,BuildBase,
-          Vendor, Coin, Item};
+          Vendor, Coin, Item, States,Actions};
 
 fn main () {
     let mut bag = Inv::new(Some([10,10]));
@@ -48,6 +48,10 @@ fn main () {
     //pick first item from vendor, and try and buy
     let tea_id = *vendor.get_inv().sort_name(false).first().unwrap().1; //0 is name, 1 is id in tuple
     println!("{:?}",vendor.buy(tea_id,6)); //not enough money
+
+    let mut state = States::Closed;
+    state.start(Actions::Using);
+    println!("{:?}",state);
 }
 
 #[derive(PartialEq,Debug,Clone)]

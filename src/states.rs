@@ -11,6 +11,11 @@ impl States {
         if *self == States::Closed { true }
         else { false }
     }
+    pub fn start (&mut self, action: Actions) {
+        if *self == States::Closed {
+            *self = States::Opened(action.next());
+        }
+    }
 }
 
 #[derive(Debug,Clone,PartialEq)]
