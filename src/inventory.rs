@@ -127,26 +127,26 @@ impl<K:Intrinsics> Inv<K> {
         self.items.get(id)
     }
 
-    fn sort_by <W:PartialOrd,F:Fn(&ItemBase)->&W> (&self, inv:bool, f:F) -> Vec<(&W,&u32)> {
+    fn sort_by <W:PartialOrd,F:Fn(&ItemBase)->&W> (&self, rev:bool, f:F) -> Vec<(&W,&u32)> {
         let mut vs = vec!();
         for (k,v) in self.items.iter() {
             vs.push((f(&v.get_base()),k));
         }
-        if !inv { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
+        if !rev { vs.sort_by(|a,b| a.partial_cmp(b).unwrap()); }
         else { vs.sort_by(|a,b| b.partial_cmp(a).unwrap()); }
         vs
     }
 
-    pub fn sort_weight (&self, inv: bool) -> Vec<(&f32,&u32)> {
-        self.sort_by(inv,|ib| &ib.weight)
+    pub fn sort_weight (&self, rev: bool) -> Vec<(&f32,&u32)> {
+        self.sort_by(rev,|ib| &ib.weight)
     }
 
-    pub fn sort_value (&self,inv:bool) -> Vec<(&Coin,&u32)>  {
-        self.sort_by(inv,|ib| &ib.value)
+    pub fn sort_value (&self,rev:bool) -> Vec<(&Coin,&u32)>  {
+        self.sort_by(rev,|ib| &ib.value)
     }
 
-    pub fn sort_name (&self, inv: bool) -> Vec<(&String,&u32)> {
-        self.sort_by(inv,|ib| &ib.name)
+    pub fn sort_name (&self, rev: bool) -> Vec<(&String,&u32)> {
+        self.sort_by(rev,|ib| &ib.name)
     }
 }
 impl<K:Intrinsics+Clone+PartialEq> InvWork<K> for Inv<K> {
